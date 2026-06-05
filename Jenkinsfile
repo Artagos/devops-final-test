@@ -78,34 +78,24 @@ pipeline {
             }
         }
 
-        // stage('Deploy docker VM') {
-        //     environment {
-        //         VM2_HOST = '192.168.1.102'
-        //         VM2_USER = 'deploy'
-        //         VM2_PORT = '4444'
-        //     }
-        //     steps {
-        //         sshagent(['vm2-ssh-key']) {
-        //             sh '''
-        //                 echo "Deploying to VM-2 (${VM2_HOST}) ..."
-
-        //                 TARGET_DIR="/opt/devops-final-test"
-
-        //                 # TODO: uncomment and adjust when VM-2 is reachable
-        //                 # ssh ${VM2_USER}@${VM2_HOST} "mkdir -p ${TARGET_DIR}"
-        //                 # scp package.json index.js ${VM2_USER}@${VM2_HOST}:${TARGET_DIR}/
-        //                 # ssh ${VM2_USER}@${VM2_HOST} "
-        //                 #   cd ${TARGET_DIR} &&
-        //                 #   npm install --production &&
-        //                 #   sudo systemctl daemon-reload &&
-        //                 #   sudo systemctl restart devops-final-test
-        //                 # "
-
-        //                 echo "Deployment to VM-2 completed (dry-run)"
-        //             '''
-        //         }
-        //     }
-        // }
+        stage('Deploy docker VM') {
+            environment {
+                VM2_HOST = 'docker'
+                VM2_USER = 'laborant'
+                VM2_PORT = '4444'
+            }
+            steps {
+                sshagent(['ssh-key']) {
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no laborant@docker \
+                            "docker pull ttl.sh/artagos:2h && \
+                             docker stop go-server || true && \
+                             docker rm go-server || true && \
+                             docker run -d -p 4444:4444 --name go-server ttl.sh/artagos:2h"
+                    '''
+                }
+            }
+        }
         // stage('Deploy to Kubernetes') {
         //     steps {
         //         sh '''

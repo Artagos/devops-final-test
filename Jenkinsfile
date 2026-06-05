@@ -60,7 +60,7 @@ pipeline {
 
                         TARGET_DIR="/opt/devops-final-test"
 
-                         ssh -o StrictHostKeyChecking=no ${VM1_USER}@${VM1_HOST} "sudo mkdir -p ${TARGET_DIR}"
+                         ssh -o StrictHostKeyChecking=no ${VM1_USER}@${VM1_HOST} "sudo mkdir -p ${TARGET_DIR} && sudo chown ${VM1_USER}:${VM1_USER} ${TARGET_DIR}"
                          scp package.json index.js ${VM1_USER}@${VM1_HOST}:${TARGET_DIR}/
                          ssh -o StrictHostKeyChecking=no ${VM1_USER}@${VM1_HOST} "
                            cd ${TARGET_DIR} &&

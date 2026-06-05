@@ -6,7 +6,7 @@ pipeline {
         IMAGE_NAME = 'devops-final-test'
         IMAGE_TAG = "${env.BUILD_NUMBER}"
         IMAGE_URI = "${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
-        K8S_NAMESPACE = 'devops-final'
+        K8S_NAMESPACE = 'default'
         POD = 'myapp'
         KUBE_SERVER = 'https://kubernetes:6443'
         KUBE_CRED = 'kube-token'

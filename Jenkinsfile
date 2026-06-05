@@ -43,7 +43,7 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 sh '''
-                    echo "Pushing image ${IMAGE_URI} to ${DOCKER_REGISTRY} ..."
+                    docker push ${IMAGE_URI}
                 '''
             }
         }

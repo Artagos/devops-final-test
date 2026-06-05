@@ -87,11 +87,12 @@ pipeline {
             steps {
                 sshagent(['ssh-key']) {
                     sh '''
-                        ssh -o StrictHostKeyChecking=no laborant@docker \
-                            "docker pull ttl.sh/artagos:2h && \
-                             docker stop go-server || true && \
-                             docker rm go-server || true && \
-                             docker run -d -p 4444:4444 --name go-server ttl.sh/artagos:2h"
+                ssh -o StrictHostKeyChecking=no ${VM2_USER}@${VM2_HOST} \
+                    "docker pull ${IMAGE_URI} && \
+                     docker stop ${IMAGE_NAME} || true && \
+                     docker rm ${IMAGE_NAME} || true && \
+                     docker run -d -p ${VM2_PORT}:4444 --name ${IMAGE_NAME} ${IMAGE_URI}"
+
                     '''
                 }
             }

@@ -103,6 +103,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
             withKubeConfig(serverUrl: env.KUBE_SERVER, credentialsId: env.KUBE_CRED) {
+                    sh "kubectl create namespace ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -"
                     sh "kubectl auth can-i create pods -n ${K8S_NAMESPACE}"
                     sh "kubectl delete pod ${POD} -n ${K8S_NAMESPACE} --ignore-not-found --wait"
                     sh "kubectl apply -f k8s/pod.yaml -n ${K8S_NAMESPACE}"

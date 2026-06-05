@@ -50,7 +50,7 @@ pipeline {
                 stage('Deploy to target VM') {
             environment {
                 VM1_HOST = 'target'
-                VM1_USER = 'lab'
+                VM1_USER = 'laborant'
                 VM1_PORT = '4444'
             }
             steps {

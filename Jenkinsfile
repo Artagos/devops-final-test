@@ -47,27 +47,10 @@ pipeline {
                 '''
             }
         }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                sh '''
-                    echo "Deploying ${IMAGE_URI} to namespace ${K8S_NAMESPACE} ..."
-
-                    # TODO: replace with actual kubeconfig context
-                    # kubectl config use-context <your-cluster-context>
-
-                    # kubectl -n ${K8S_NAMESPACE} set image deployment/${IMAGE_NAME} \\
-                    #   ${IMAGE_NAME}=${IMAGE_URI}
-
-                    echo "Deployment to Kubernetes completed (dry-run)"
-                '''
-            }
-        }
-
-        stage('Deploy to VM-1') {
+                stage('Deploy to target VM') {
             environment {
-                VM1_HOST = '192.168.1.101'
-                VM1_USER = 'deploy'
+                VM1_HOST = 'target'
+                VM1_USER = 'lab'
                 VM1_PORT = '4444'
             }
             steps {
@@ -78,8 +61,8 @@ pipeline {
                         # TODO: uncomment and adjust when VM-1 is reachable
                         # ssh ${VM1_USER}@${VM1_HOST} "
                         #   docker pull ${IMAGE_URI} &&
-                        #   docker stop ${IMAGE_NAME} 2>/dev/null; docker rm ${IMAGE_NAME} 2>/dev/null;
-                        #   docker run -d --name ${IMAGE_NAME} -p ${VM1_PORT}:4444 ${IMAGE_URI}
+                        #   sudo systemctl stop ${IMAGE_NAME} 2>/dev/null; sudo systemctl reset-failed ${IMAGE_NAME} 2>/dev/null;
+                        #   sudo systemctl start ${IMAGE_NAME}
                         # "
 
                         echo "Deployment to VM-1 completed (dry-run)"
@@ -88,7 +71,7 @@ pipeline {
             }
         }
 
-        stage('Deploy to VM-2') {
+        stage('Deploy docker VM') {
             environment {
                 VM2_HOST = '192.168.1.102'
                 VM2_USER = 'deploy'
@@ -102,13 +85,28 @@ pipeline {
                         # TODO: uncomment and adjust when VM-2 is reachable
                         # ssh ${VM2_USER}@${VM2_HOST} "
                         #   docker pull ${IMAGE_URI} &&
-                        #   docker stop ${IMAGE_NAME} 2>/dev/null; docker rm ${IMAGE_NAME} 2>/dev/null;
-                        #   docker run -d --name ${IMAGE_NAME} -p ${VM2_PORT}:4444 ${IMAGE_URI}
+                        #   sudo systemctl stop ${IMAGE_NAME} 2>/dev/null; sudo systemctl reset-failed ${IMAGE_NAME} 2>/dev/null;
+                        #   sudo systemctl start ${IMAGE_NAME}
                         # "
 
                         echo "Deployment to VM-2 completed (dry-run)"
                     '''
                 }
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                    echo "Deploying ${IMAGE_URI} to namespace ${K8S_NAMESPACE} ..."
+
+                    # TODO: replace with actual kubeconfig context
+                    # kubectl config use-context <your-cluster-context>
+
+                    # kubectl -n ${K8S_NAMESPACE} set image deployment/${IMAGE_NAME} \\
+                    #   ${IMAGE_NAME}=${IMAGE_URI}
+
+                    echo "Deployment to Kubernetes completed (dry-run)"
+                '''
             }
         }
     }

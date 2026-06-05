@@ -54,16 +54,20 @@ pipeline {
                 VM1_PORT = '4444'
             }
             steps {
-                sshagent(['vm1-ssh-key']) {
+                sshagent(['ssh-key']) {
                     sh '''
                         echo "Deploying to VM-1 (${VM1_HOST}) ..."
 
-                        # TODO: uncomment and adjust when VM-1 is reachable
-                        # ssh ${VM1_USER}@${VM1_HOST} "
-                        #   docker pull ${IMAGE_URI} &&
-                        #   sudo systemctl stop ${IMAGE_NAME} 2>/dev/null; sudo systemctl reset-failed ${IMAGE_NAME} 2>/dev/null;
-                        #   sudo systemctl start ${IMAGE_NAME}
-                        # "
+                        TARGET_DIR="/opt/devops-final-test"
+
+                         ssh ${VM1_USER}@${VM1_HOST} "mkdir -p ${TARGET_DIR}"
+                         scp package.json index.js ${VM1_USER}@${VM1_HOST}:${TARGET_DIR}/
+                         ssh ${VM1_USER}@${VM1_HOST} "
+                           cd ${TARGET_DIR} &&
+                           npm install --production &&
+                           sudo systemctl daemon-reload &&
+                           sudo systemctl restart devops-final-test
+                         "
 
                         echo "Deployment to VM-1 completed (dry-run)"
                     '''
@@ -71,44 +75,49 @@ pipeline {
             }
         }
 
-        stage('Deploy docker VM') {
-            environment {
-                VM2_HOST = '192.168.1.102'
-                VM2_USER = 'deploy'
-                VM2_PORT = '4444'
-            }
-            steps {
-                sshagent(['vm2-ssh-key']) {
-                    sh '''
-                        echo "Deploying to VM-2 (${VM2_HOST}) ..."
+        // stage('Deploy docker VM') {
+        //     environment {
+        //         VM2_HOST = '192.168.1.102'
+        //         VM2_USER = 'deploy'
+        //         VM2_PORT = '4444'
+        //     }
+        //     steps {
+        //         sshagent(['vm2-ssh-key']) {
+        //             sh '''
+        //                 echo "Deploying to VM-2 (${VM2_HOST}) ..."
 
-                        # TODO: uncomment and adjust when VM-2 is reachable
-                        # ssh ${VM2_USER}@${VM2_HOST} "
-                        #   docker pull ${IMAGE_URI} &&
-                        #   sudo systemctl stop ${IMAGE_NAME} 2>/dev/null; sudo systemctl reset-failed ${IMAGE_NAME} 2>/dev/null;
-                        #   sudo systemctl start ${IMAGE_NAME}
-                        # "
+        //                 TARGET_DIR="/opt/devops-final-test"
 
-                        echo "Deployment to VM-2 completed (dry-run)"
-                    '''
-                }
-            }
-        }
-        stage('Deploy to Kubernetes') {
-            steps {
-                sh '''
-                    echo "Deploying ${IMAGE_URI} to namespace ${K8S_NAMESPACE} ..."
+        //                 # TODO: uncomment and adjust when VM-2 is reachable
+        //                 # ssh ${VM2_USER}@${VM2_HOST} "mkdir -p ${TARGET_DIR}"
+        //                 # scp package.json index.js ${VM2_USER}@${VM2_HOST}:${TARGET_DIR}/
+        //                 # ssh ${VM2_USER}@${VM2_HOST} "
+        //                 #   cd ${TARGET_DIR} &&
+        //                 #   npm install --production &&
+        //                 #   sudo systemctl daemon-reload &&
+        //                 #   sudo systemctl restart devops-final-test
+        //                 # "
 
-                    # TODO: replace with actual kubeconfig context
-                    # kubectl config use-context <your-cluster-context>
+        //                 echo "Deployment to VM-2 completed (dry-run)"
+        //             '''
+        //         }
+        //     }
+        // }
+        // stage('Deploy to Kubernetes') {
+        //     steps {
+        //         sh '''
+        //             echo "Deploying ${IMAGE_URI} to namespace ${K8S_NAMESPACE} ..."
 
-                    # kubectl -n ${K8S_NAMESPACE} set image deployment/${IMAGE_NAME} \\
-                    #   ${IMAGE_NAME}=${IMAGE_URI}
+        //             # TODO: replace with actual kubeconfig context
+        //             # kubectl config use-context <your-cluster-context>
 
-                    echo "Deployment to Kubernetes completed (dry-run)"
-                '''
-            }
-        }
+        //             # kubectl -n ${K8S_NAMESPACE} set image deployment/${IMAGE_NAME} \\
+        //             #   ${IMAGE_NAME}=${IMAGE_URI}
+
+        //             echo "Deployment to Kubernetes completed (dry-run)"
+        //         '''
+        //     }
+        // }
     }
 
     post {

@@ -1,14 +1,12 @@
 [Unit]
 Description=DevOps Final Test
-After=docker.service
-Requires=docker.service
+After=network.target
 
 [Service]
 Restart=always
-ExecStartPre=/usr/bin/docker pull ttl.sh/devops-final-test:latest
-ExecStart=/usr/bin/docker run --rm --name devops-final-test -p 4444:4444 ttl.sh/devops-final-test:latest
-ExecStop=/usr/bin/docker stop devops-final-test
-ExecStopPost=/usr/bin/docker rm devops-final-test
+WorkingDirectory=/opt/devops-final-test
+ExecStart=/usr/bin/node /opt/devops-final-test/index.js
+Environment=NODE_ENV=production
 
 [Install]
 WantedBy=multi-user.target

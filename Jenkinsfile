@@ -7,6 +7,9 @@ pipeline {
         IMAGE_TAG = "${env.BUILD_NUMBER}"
         IMAGE_URI = "${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
         K8S_NAMESPACE = 'devops-final'
+        POD = 'myapp'
+        KUBE_SERVER = 'https://kubernetes:6443'
+        KUBE_CRED = 'kube-token'
     }
 
     stages {
@@ -97,21 +100,19 @@ pipeline {
                 }
             }
         }
-        // stage('Deploy to Kubernetes') {
-        //     steps {
-        //         sh '''
-        //             echo "Deploying ${IMAGE_URI} to namespace ${K8S_NAMESPACE} ..."
-
-        //             # TODO: replace with actual kubeconfig context
-        //             # kubectl config use-context <your-cluster-context>
-
-        //             # kubectl -n ${K8S_NAMESPACE} set image deployment/${IMAGE_NAME} \\
-        //             #   ${IMAGE_NAME}=${IMAGE_URI}
-
-        //             echo "Deployment to Kubernetes completed (dry-run)"
-        //         '''
-        //     }
-        // }
+        stage('Deploy to Kubernetes') {
+            steps {
+            withKubeConfig(serverUrl: env.KUBE_SERVER, credentialsId: env.KUBE_CRED) {
+                    sh "kubectl auth can-i create pods -n ${K8S_NAMESPACE}"
+                    sh "kubectl delete pod ${POD} -n ${K8S_NAMESPACE} --ignore-not-found --wait"
+                    sh "kubectl apply -f k8s/pod.yaml -n ${K8S_NAMESPACE}"
+                    sh "kubectl apply -f k8s/service.yaml -n ${K8S_NAMESPACE}"
+                    sh "kubectl wait --for=condition=Ready pod/${POD} -n ${K8S_NAMESPACE} --timeout=90s"
+                    sh "kubectl get pod ${POD} -n ${K8S_NAMESPACE} -o wide"
+                    sh "kubectl get service ${POD} -n ${K8S_NAMESPACE} -o wide"
+                }
+            }
+        }
     }
 
     post {

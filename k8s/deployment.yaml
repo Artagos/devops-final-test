@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-final-test
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: devops-final-test
+  template:
+    metadata:
+      labels:
+        app: devops-final-test
+    spec:
+      containers:
+      - name: devops-final-test
+        image: localhost:5000/devops-final-test:latest
+        ports:
+        - containerPort: 4444

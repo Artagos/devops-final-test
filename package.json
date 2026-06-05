@@ -1,0 +1,13 @@
+{
+  "name": "devops-final-test",
+  "version": "1.0.0",
+  "description": "DevOps Final Test",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node --test index.test.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}

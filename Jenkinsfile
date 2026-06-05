@@ -61,11 +61,13 @@ pipeline {
                         TARGET_DIR="/opt/devops-final-test"
 
                          ssh -o StrictHostKeyChecking=no ${VM1_USER}@${VM1_HOST} "sudo mkdir -p ${TARGET_DIR}"
-                         scp package.json index.js ${VM1_USER}@${VM1_HOST}:/tmp/
+                         scp package.json index.js systemd/devops-final-test.service ${VM1_USER}@${VM1_HOST}:/tmp/
                          ssh -o StrictHostKeyChecking=no ${VM1_USER}@${VM1_HOST} "
                            sudo mv /tmp/package.json /tmp/index.js ${TARGET_DIR}/ &&
+                           sudo mv /tmp/devops-final-test.service /etc/systemd/system/ &&
                            cd ${TARGET_DIR} &&
                            npm install --production &&
+                           sudo systemctl enable devops-final-test &&
                            sudo systemctl daemon-reload &&
                            sudo systemctl restart devops-final-test
                          "
